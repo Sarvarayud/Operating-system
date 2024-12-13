@@ -1,0 +1,92 @@
+#include <stdio.h>
+
+struct Process {
+    int pid;        
+    int burst_time; 
+    int wait_time;  
+    int turn_time;  
+};
+
+void calculateWaitingTime(struct Process processes[], int n) {
+    processes[0].wait_time = 0;
+
+    for (int i = 1; i < n; i++) {
+        processes[i].wait_time = processes[i - 1].wait_time + processes[i - 1].burst_time;
+    }
+}
+
+void calculateTurnaroundTime(struct Process processes[], int n) {
+    for (int i = 0; i < n; i++) {
+        processes[i].turn_time = processes[i].wait_time + processes[i].burst_time;
+    }
+}
+
+void sortByBurstTime(struct Process processes[], int n) {
+    for (int i = 0; i < n - 1; i++) {
+        for (int j = 0; j < n - i - 1; j++) {
+            if (processes[j].burst_time > processes[j + 1].burst_time) {
+                struct Process temp = processes[j];
+                processes[j] = processes[j + 1];
+                processes[j + 1] = temp;
+            }
+        }
+    }
+}
+
+void printProcesses(struct Process processes[], int n) {
+    printf("\nPID\tBurst Time\tWaiting Time\tTurnaround Time\n");
+    for (int i = 0; i < n; i++) {
+        printf("%d\t%d\t\t%d\t\t%d\n", processes[i].pid, processes[i].burst_time, processes[i].wait_time, processes[i].turn_time);
+    }
+}
+
+void calculateAverageTimes(struct Process processes[], int n) {
+    float total_wait_time = 0, total_turn_time = 0;
+
+    for (int i = 0; i < n; i++) {
+        total_wait_time += processes[i].wait_time;
+        total_turn_time += processes[i].turn_time;
+    }
+
+    printf("\nAverage Waiting Time: %.2f\n", total_wait_time / n);
+    printf("Average Turnaround Time: %.2f\n", total_turn_time / n);
+}
+
+int main() {
+    int n;
+
+    printf("Enter the number of processes: ");
+    scanf("%d", &n);
+
+    struct Process processes[n];
+
+    for (int i = 0; i < n; i++) {
+        processes[i].pid = i + 1;
+        printf("Enter burst time for process %d: ", i + 1);
+        scanf("%d", &processes[i].burst_time);
+    }
+    sortByBurstTime(processes, n);
+    calculateWaitingTime(processes, n);
+    calculateTurnaroundTime(processes, n);
+
+    printProcesses(processes, n);
+
+    calculateAverageTimes(processes, n);
+
+    return 0;
+}
+
+output:
+Enter the number of processes: 3
+Enter burst time for process 1: 12
+Enter burst time for process 2: 10
+Enter burst time for process 3: 14
+PID	Burst Time	Waiting Time	Turnaround Time
+2	   10		  0		  10
+1	   12		 10		  22
+3	   14		 22		  36
+
+
+Average Waiting Time: 10.67
+Average Turnaround Time: 22.67
+
