@@ -1,0 +1,64 @@
+#include <stdio.h>
+#include <fcntl.h>
+#include <unistd.h>
+#include <string.h>
+#include <stdlib.h>
+
+#define BUFFER_SIZE 1024
+
+int main() {
+    char *filename = "example.txt";
+    char *content = "This is a demonstration of UNIX system calls for file management.\n";
+    char buffer[BUFFER_SIZE];
+    ssize_t bytesRead, bytesWritten;
+    
+    int fileDescriptor = open(filename, O_CREAT | O_WRONLY | O_TRUNC, 0644);
+    if (fileDescriptor == -1) {
+        perror("Error creating/opening file");
+        exit(EXIT_FAILURE);
+    }
+    printf("File '%s' created and opened successfully.\n", filename);
+    
+    bytesWritten = write(fileDescriptor, content, strlen(content));
+    if (bytesWritten == -1) {
+        perror("Error writing to file");
+        close(fileDescriptor);
+        exit(EXIT_FAILURE);
+    }
+    printf("Successfully wrote %zd bytes to the file.\n", bytesWritten);
+    
+    close(fileDescriptor);
+    fileDescriptor = open(filename, O_RDONLY);
+    if (fileDescriptor == -1) {
+        perror("Error opening file for reading");
+        exit(EXIT_FAILURE);
+    }
+    printf("File '%s' opened for reading successfully.\n", filename);
+
+    bytesRead = read(fileDescriptor, buffer, BUFFER_SIZE - 1);
+    if (bytesRead == -1) {
+        perror("Error reading from file");
+        close(fileDescriptor);
+        exit(EXIT_FAILURE);
+    }
+    buffer[bytesRead] = '\0'; 
+    printf("Content read from file:\n%s", buffer);
+
+    close(fileDescriptor);
+    if (unlink(filename) == -1) {
+        perror("Error deleting file");
+        exit(EXIT_FAILURE);
+    }
+    printf("File '%s' deleted successfully.\n", filename);
+
+    return 0;
+}
+
+
+output:
+File 'example.txt' created and opened successfully.
+Successfully wrote 62 bytes to the file.
+File 'example.txt' opened for reading successfully.
+Content read from file:
+This is a demonstration of UNIX system calls for file management.
+File 'example.txt' deleted successfully.
